@@ -1,0 +1,10 @@
+{
+  "scrapers": [
+    {
+      "name": "Hacker News",
+      "urlPattern": "news.ycombinator.com",
+      "searchUrl": "https://hn.algolia.com/?q={term}"
+    }
+  ],
+  "file": "hackernews.js"
+}
