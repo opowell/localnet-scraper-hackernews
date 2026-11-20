@@ -1,4 +1,24 @@
-// A listing page (the front page, newest, ask, show…) links to each story's discussion, the higher ranked more strongly.
+// What a listing's subtext says of a story, as details: its points, author, when it was posted and how many comments it
+// has, as [name, value] pairs so that they keep their order. A job ad has its age alone; "discuss" is no comments.
+function storyDetails(row) {
+  const subtext = row.nextElementSibling?.querySelector('.subtext')
+  if (!subtext) {
+    return undefined
+  }
+  const points = Number.parseInt(subtext.querySelector('.score')?.textContent, 10)
+  const user = subtext.querySelector('.hnuser')
+  const comments = Array.from(subtext.querySelectorAll('a'), a => /^(\d+)\s+comments?$/.exec(a.textContent.replace(/\u00A0/g, ' ').trim()))
+    .find(Boolean)
+  return [
+    ['points', Number.isNaN(points) ? null : points],
+    ['author', user ? { text: user.textContent.trim(), url: user.href } : null],
+    ['time', postedTime(subtext)],
+    ['comments', comments ? Number(comments[1]) : null],
+  ].filter(([, value]) => value !== null)
+}
+
+// A listing page (the front page, newest, ask, show…) links to each story's discussion, the higher ranked more strongly,
+// with its title and what its subtext says of it (see storyDetails).
 function parseHackerNewsListing() {
   const rows = Array.from(document.querySelectorAll('tr.athing.submission'))
   return {
@@ -10,6 +30,7 @@ function parseHackerNewsListing() {
       return {
         url: `https://news.ycombinator.com/item?id=${row.id}`,
         title: row.querySelector('.titleline > a')?.textContent,
+        details: storyDetails(row),
         score: 1 / (1 + rank / 10),
       }
     }),

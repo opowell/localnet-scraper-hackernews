@@ -33,6 +33,24 @@ describe('hacker News', () => {
     expect(links[1].score).toBeLessThan(1)
   })
 
+  it('gives each listed story its points, author, age and comments, as its subtext says them', () => {
+    visit('https://news.ycombinator.com/', `<table>
+      <tr class="athing submission" id="1"><td><span class="titleline"><a href="https://a.example/">First</a></span></td></tr>
+      <tr><td class="subtext"><span class="subline"><span class="score">138 points</span> by <a href="user?id=ann" class="hnuser">ann</a>
+        <span class="age" title="2026-11-06T19:48:51 1793994531"><a href="item?id=1">1 hour ago</a></span> | <a href="hide?id=1">hide</a> | <a href="item?id=1">38&nbsp;comments</a></span></td></tr>
+      <tr class="athing submission" id="2"><td><span class="titleline"><a href="https://b.example/">Second</a></span></td></tr>
+      <tr><td class="subtext"><span class="subline"><span class="score">1 point</span> by <a href="user?id=bo" class="hnuser">bo</a>
+        <span class="age" title="2026-11-06T20:00:00"><a href="item?id=2">2 minutes ago</a></span> | <a href="item?id=2">discuss</a></span></td></tr>
+      <tr class="athing submission" id="3"><td><span class="titleline"><a href="https://c.example/">Job</a></span></td></tr>
+      <tr><td class="subtext"><span class="age" title="2026-11-06T18:00:00"><a href="item?id=3">3 hours ago</a></span></td></tr>
+    </table>`)
+    expect(parseHackerNews().links.map((l: any) => l.details)).toEqual([
+      [['points', 138], ['author', { text: 'ann', url: 'https://news.ycombinator.com/user?id=ann' }], ['time', '2026-11-06T19:48:51.000Z'], ['comments', 38]],
+      [['points', 1], ['author', { text: 'bo', url: 'https://news.ycombinator.com/user?id=bo' }], ['time', '2026-11-06T20:00:00.000Z']],
+      [['time', '2026-11-06T18:00:00.000Z']],
+    ])
+  })
+
   it('weights a later page\'s stories by their rank across pages', () => {
     visit('https://news.ycombinator.com/?p=2', `<table>
       <tr class="athing submission" id="31"><td><span class="rank">31.</span></td><td><span class="titleline"><a href="https://a.example/">Thirty-first</a></span></td></tr>
